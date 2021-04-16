@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Socket.IO chat</title>
+
+    <style>
+      body { margin: 0; padding-bottom: 3rem; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: rgb(208,248,255);}
+      h1 {position:sticky; text-align: center; top: 10px; background-color: grey; color:white;}
+     
+      #top {position: sticky; top: 0px;}
+      #form { background: rgba(0, 0, 0, 0.15); padding: 0.25rem; position: fixed; bottom: 0; left: 0; right: 0; display: flex; height: 3rem; box-sizing: border-box; backdrop-filter: blur(10px); }
+      #input { border: none; padding: 0 1rem; flex-grow: 1; border-radius: 2rem; margin: 0.25rem; }
+      #input:focus { outline: none; }
+      #form > button { background: #333; border: none; padding: 0 1rem; margin: 0.25rem; border-radius: 3px; outline: none; color: #fff; }
+
+      #messages { list-style-type: none; }
+      #messages > li { padding: 0.5rem 1rem; }
+      #messages > li:nth-child(odd) { background: #efefef; }
+      #logged_in {}
+    </style>
+  </head>
+  <body>
+    <div id='top'>
+    <h1 id='haus'>Dýflissa Gissurar VOL2</h1>
+    </div>
+    <div id='middle'>
+    <ul id='messages'></ul>
+    </div>
+    <div>
+      <h6>Innskráðir notendur</h6>
+      <ul id='logged_in'></ul>
+    </div>
+    <form id='form' action="">
+      <input id="input" autocomplete="off" /><button>Send</button>
+      
+    </form>
+    <script src='/socket.io/socket.io.js'></script>
+    <script type='text/javascript'>
+    // það er einn smá böggur í þessu öllu saman, en ég áttaði mig ekki alveg á hvernig ég gæti stælað upp login síðuna og síðuna sem tekur við þeim sem slá inn rangt lykilorð. svo þær eru bara hráar. 
+    // læt samt eitthvað af skjölunum fylgja með. 
+      
+      var socket = io();
+      
+     // hér velur þú notendanafnið 
+      var nickName = prompt('Sláðu inn nafnið þitt')
+      socket.emit('nyr_notandi', nickName)
+      
+      var messages = document.getElementById('messages');
+      var form = document.getElementById('form');
+      var input = document.getElementById('input');
+
+      // tekur við innskráðum notendum server site og birtir þá client site. 
+      socket.on('uppf_not', (innskr_not) => {
+       var usersonline = document.getElementById('logged_in');
+        usersonline.innerHTML = "";
+        for (var i = 0; i < innskr_not.length; i++)
+        var listi = document.createElement('li')
+        listi.textContent = innskr_not;
+        logged_in.appendChild(listi);
+      });
+       
+      //atburðarhlustari 
+      form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        if (input.value) {
+          socket.emit('chat message', input.value);
+          input.value = '';
+        }
+      });
+      
+    // meðhöndlar chat message frá server site og birtir sem list item client site. 
+      socket.on('chat message', function(msg) {
+        var item = document.createElement('li');
+        item.textContent = msg;
+        messages.appendChild(item);
+        window.scrollTo(0, document.body.scrollHeight);
+      });
+
+
+    </script>
+  </body>
+</html>
